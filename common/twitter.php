@@ -1198,7 +1198,7 @@ function theme_timeline($feed) {
 		}
 		
 		if ($status->in_reply_to_status_id) {
-			$replyto = "<a href='".BASE_URL."status/{$status->in_reply_to_status_id}'>>></a>";
+			$replyto = "<a href='".BASE_URL."status/{$status->in_reply_to_status_id}'>对话</a>";
 		} else {
 			$replyto = null;
 		}
@@ -1223,12 +1223,29 @@ function theme_timeline($feed) {
 			$retweeted_times = $status->retweet_count;
 			$retweeted_times_minus = $retweeted_times - 1;
 			$retweeted_times_str = ($retweeted_times && $retweeted_times_minus) ? "+{$retweeted_times_minus}" : "";
-			$html .= " <small class='sretweet'>".__("retweeted by")." <a href='".BASE_URL."user/{$retweeted_by}'>{$retweeted_by}</a>{$retweeted_times_str} ".__("<span style='display:none;'>zhuanfa</span>")."</small>";
+            $retweeted = " <small class='sretweet'>".__("retweeted by")." <a href='".BASE_URL."user/{$retweeted_by}'>{$retweeted_by}</a>{$retweeted_times_str} ".__("<span style='display:none;'>zhuanfa</span>")."</small>";
 		}
 
 		if (setting_fetch('avataro', 'yes') == 'yes') {
 			$html .= "</td></tr></table>";
 		}
+
+        /* HACK: generate html */
+        $html_avatar = "<a href='".BASE_URL."user/{$status->from->screen_name}'>$avatar</a>";
+        $html_media = (setting_fetch('showthumbs', 'yes') == 'yes')? "<br/>".twitter_get_media($status):"";
+        $html_user = "<b class='suser'><a href='".BASE_URL."user/{$status->from->screen_name}'>{$status->from->screen_name}</a></b> ";
+        //$html_user = "";
+        $html_text = "<span class='stext'>{$text}</span> <small class='sbutton'>$source</small>";
+        $html_buttons = "<small class='sbutton'>$actions $link</small>";
+        $html_retweeted = "<small class='sbutton'>$replyto $retweeted</small>";
+
+        $setting_avatar = setting_fetch('avataro', 'yes');
+        $setting_buttonend = setting_fetch('buttonend', 'yes');
+        if ($setting_avatar == 'yes') {
+            $html = "<table><tr><td width='$avatar_width'>$html_avatar</td><td>$html_user $html_buttons</td></tr><tr><td colspan=2>$html_text $html_retweeted</td></tr></table>";
+        } else {
+            $html = "$html_user $html_buttons<br>$html_text $html_media $html_retweeted";
+        }
 
 		unset($row);
 		$class = 'status';
